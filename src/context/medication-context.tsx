@@ -1,9 +1,9 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useState, useEffect } from 'react';
 import type { Medication, IntakeLog } from '@/lib/types';
-import { INITIAL_MEDICATIONS, INITIAL_LOGS } from '@/lib/data';
+import { INITIAL_MEDICATIONS, INITIAL_LOGS, generateLogs } from '@/lib/data';
 
 interface MedicationContextType {
   medications: Medication[];
@@ -20,6 +20,10 @@ const MedicationContext = createContext<MedicationContextType | undefined>(undef
 export const MedicationProvider = ({ children }: { children: ReactNode }) => {
   const [medications, setMedications] = useState<Medication[]>(INITIAL_MEDICATIONS);
   const [logs, setLogs] = useState<IntakeLog[]>(INITIAL_LOGS);
+
+  useEffect(() => {
+    setLogs(generateLogs());
+  }, []);
 
   const addMedication = (med: Omit<Medication, 'id'>) => {
     const newMed = { ...med, id: Date.now().toString() };

@@ -43,7 +43,7 @@ export const INITIAL_MEDICATIONS: Medication[] = [
   },
 ];
 
-const generateLogs = (): IntakeLog[] => {
+export const generateLogs = (): IntakeLog[] => {
   const logs: IntakeLog[] = [];
   const today = new Date();
   
@@ -95,4 +95,4 @@ const generateLogs = (): IntakeLog[] => {
   return logs.sort((a,b) => new Date(b.time).getTime() - new Date(a.time).getTime());
 };
 
-export const INITIAL_LOGS: IntakeLog[] = generateLogs();
+export const INITIAL_LOGS: IntakeLog[] = [];
