@@ -6,9 +6,10 @@ import { CheckCircle, Clock, PlusCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { MedicationFormSheet } from '../medications/medication-form-sheet';
 import { useState } from 'react';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export function TodaySchedule() {
-  const { medications, logs, logIntake } = useMedication();
+  const { medications, logs, logIntake, isClient } = useMedication();
   const { toast } = useToast();
   const [isSheetOpen, setSheetOpen] = useState(false);
 
@@ -61,7 +62,13 @@ export function TodaySchedule() {
         <CardDescription>Your medication plan for today. Stay on track!</CardDescription>
       </CardHeader>
       <CardContent>
-        {todaySchedules.length > 0 ? (
+        {!isClient ? (
+          <div className="space-y-4">
+            <Skeleton className="h-[68px] w-full" />
+            <Skeleton className="h-[68px] w-full" />
+            <Skeleton className="h-[68px] w-full" />
+          </div>
+        ) : todaySchedules.length > 0 ? (
           <ul className="space-y-4">
             {todaySchedules.map(({ medication, time, isTaken }, index) => (
               <li key={`${medication.id}-${time}-${index}`} className="flex items-center justify-between p-3 rounded-lg bg-secondary/50">

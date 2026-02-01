@@ -1,13 +1,18 @@
 'use client';
 import { useMedication } from '@/context/medication-context';
 import { Calendar } from '@/components/ui/calendar';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export function AdherenceCalendar() {
-  const { logs } = useMedication();
+  const { logs, isClient } = useMedication();
 
   const loggedDays = logs
     .filter(log => log.status === 'taken')
     .map(log => new Date(log.time));
+
+  if (!isClient) {
+    return <Skeleton className="h-[298px] w-[280px] rounded-md" />;
+  }
 
   return (
     <Calendar

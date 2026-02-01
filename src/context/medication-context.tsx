@@ -13,6 +13,7 @@ interface MedicationContextType {
   deleteMedication: (id: string) => void;
   logIntake: (log: Omit<IntakeLog, 'id'>) => void;
   getLogsForMedication: (medicationId: string) => IntakeLog[];
+  isClient: boolean;
 }
 
 const MedicationContext = createContext<MedicationContextType | undefined>(undefined);
@@ -20,9 +21,11 @@ const MedicationContext = createContext<MedicationContextType | undefined>(undef
 export const MedicationProvider = ({ children }: { children: ReactNode }) => {
   const [medications, setMedications] = useState<Medication[]>(INITIAL_MEDICATIONS);
   const [logs, setLogs] = useState<IntakeLog[]>(INITIAL_LOGS);
+  const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
     setLogs(generateLogs());
+    setIsClient(true);
   }, []);
 
   const addMedication = (med: Omit<Medication, 'id'>) => {
@@ -54,7 +57,8 @@ export const MedicationProvider = ({ children }: { children: ReactNode }) => {
     updateMedication,
     deleteMedication,
     logIntake,
-    getLogsForMedication
+    getLogsForMedication,
+    isClient,
   };
 
   return (

@@ -4,9 +4,10 @@ import { useMedication } from '@/context/medication-context';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip } from 'recharts';
 import { ChartTooltipContent } from '@/components/ui/chart';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export function AdherenceOverview() {
-  const { logs, medications } = useMedication();
+  const { logs, medications, isClient } = useMedication();
 
   const data = Array.from({ length: 7 }).map((_, i) => {
     const date = new Date();
@@ -40,18 +41,22 @@ export function AdherenceOverview() {
         <CardDescription>Your progress over the last 7 days.</CardDescription>
       </CardHeader>
       <CardContent>
-        <ResponsiveContainer width="100%" height={250}>
-          <BarChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-             <Tooltip
-                cursor={{ fill: 'hsl(var(--secondary))', radius: 'var(--radius)' }}
-                content={<ChartTooltipContent indicator="dot" />}
-             />
-            <XAxis dataKey="day" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
-            <YAxis stroke="#888888" fontSize={12} tickLine={false} axisLine={false} allowDecimals={false} />
-            <Bar dataKey="taken" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} name="Taken" />
-            <Bar dataKey="scheduled" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} opacity={0.2} name="Scheduled" />
-          </BarChart>
-        </ResponsiveContainer>
+        {isClient ? (
+          <ResponsiveContainer width="100%" height={250}>
+            <BarChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+               <Tooltip
+                  cursor={{ fill: 'hsl(var(--secondary))', radius: 'var(--radius)' }}
+                  content={<ChartTooltipContent indicator="dot" />}
+               />
+              <XAxis dataKey="day" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
+              <YAxis stroke="#888888" fontSize={12} tickLine={false} axisLine={false} allowDecimals={false} />
+              <Bar dataKey="taken" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} name="Taken" />
+              <Bar dataKey="scheduled" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} opacity={0.2} name="Scheduled" />
+            </BarChart>
+          </ResponsiveContainer>
+        ) : (
+          <Skeleton className="h-[250px] w-full" />
+        )}
       </CardContent>
     </Card>
   );

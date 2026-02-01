@@ -2,9 +2,10 @@
 import { useMedication } from '@/context/medication-context';
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
 import { ChartTooltipContent } from '@/components/ui/chart';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export function AdherenceChart() {
-  const { logs, medications } = useMedication();
+  const { logs, medications, isClient } = useMedication();
 
   const data = Array.from({ length: 30 }).map((_, i) => {
     const date = new Date();
@@ -30,6 +31,10 @@ export function AdherenceChart() {
       scheduled: scheduledDoses,
     };
   }).reverse();
+
+  if (!isClient) {
+    return <Skeleton className="h-[350px] w-full" />;
+  }
 
   return (
     <ResponsiveContainer width="100%" height={350}>
