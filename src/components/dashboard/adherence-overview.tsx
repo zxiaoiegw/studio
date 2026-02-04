@@ -49,7 +49,7 @@ export function AdherenceOverview() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Weekly Adherence</CardTitle>
+        <CardTitle>Weekly Report</CardTitle>
         <CardDescription>Your progress over the last 7 days.</CardDescription>
       </CardHeader>
       <CardContent>

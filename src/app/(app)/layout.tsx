@@ -16,9 +16,9 @@ import {
   LayoutDashboard,
   Pill,
   BarChart3,
-  Settings,
-  Bell,
 } from 'lucide-react';
+import { NotificationDropdown } from '@/components/notifications/notification-dropdown';
+import { SignedIn, UserButton } from '@clerk/nextjs';
 import { usePathname } from 'next/navigation';
 import { Logo } from '@/components/icons';
 import Image from 'next/image';
@@ -56,7 +56,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           {menuItems.map((item) => (
             <SidebarMenuItem key={item.href}>
               <SidebarMenuButton
-                href={item.href}
                 isActive={pathname === item.href}
                 asChild
                 tooltip={item.label}
@@ -69,7 +68,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             </SidebarMenuItem>
           ))}
         </SidebarMenu>
-        <SidebarFooter className="mt-auto">
+        {/* <SidebarFooter className="mt-auto">
           <div className="flex items-center gap-3 p-2">
             {userAvatar && (
               <Avatar className="size-10">
@@ -84,15 +83,17 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               <span className="text-sidebar-foreground/70">user@pillpal.com</span>
             </div>
           </div>
-        </SidebarFooter>
+        </SidebarFooter> */}
       </Sidebar>
       <SidebarInset>
-        <header className="sticky top-0 z-10 flex h-16 items-center justify-between border-b bg-background/80 px-4 backdrop-blur-sm md:justify-end">
+        <header className="sticky top-0 z-10 flex h-16 items-center justify-between border-b bg-background/80 px-4 backdrop-blur-sm">
           <SidebarTrigger className="md:hidden" />
-          <div className="flex items-center gap-4">
-            <button><Bell size={20} /></button>
-            <button><Settings size={20} /></button>
-          </div>
+          <SignedIn>
+            <div className="ml-auto flex items-center gap-4">
+              <NotificationDropdown />
+              <UserButton />
+            </div>
+          </SignedIn>
         </header>
         <main className="flex-1 p-4 md:p-6 lg:p-8">
           {children}

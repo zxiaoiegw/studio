@@ -1,7 +1,8 @@
 import type {NextConfig} from 'next';
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  /* Hide the floating "N" dev indicator (Route, Turbopack, Preferences dropdown) in development */
+  devIndicators: false,
   typescript: {
     ignoreBuildErrors: true,
   },

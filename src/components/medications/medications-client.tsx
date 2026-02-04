@@ -6,25 +6,47 @@ import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { MoreHorizontal, PlusCircle, Trash, Edit, Bot } from 'lucide-react';
+import { Bot, MoreHorizontal, PlusCircle, Scan, Trash, Edit } from 'lucide-react';
 import type { Medication } from '@/lib/types';
 import { MedicationFormSheet } from './medication-form-sheet';
 import { SmartScheduleDialog } from './smart-schedule-dialog';
+import { PrescriptionScanDialog } from './prescription-scan-dialog';
+
+/** Cleans up Radix Dialog/Sheet leftover state (pointer-events, inert) that can block clicks after close. */
+function cleanupRadixOverlay() {
+  if (typeof document === 'undefined') return;
+  const run = () => {
+    document.body.style.removeProperty('pointer-events');
+    document.body.removeAttribute('inert');
+    document.documentElement.removeAttribute('inert');
+    document.querySelectorAll('[inert]').forEach((el) => el.removeAttribute('inert'));
+  };
+  requestAnimationFrame(() => run());
+  setTimeout(run, 150);
+}
 
 export function MedicationsClient() {
   const { medications, deleteMedication } = useMedication();
   const [sheetOpen, setSheetOpen] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedMedication, setSelectedMedication] = useState<Medication | undefined>(undefined);
+  const [tableKey, setTableKey] = useState(0);
+  const [scanOpen, setScanOpen] = useState(false);
+  const [parsedMedication, setParsedMedication] = useState<Partial<Medication> | undefined>(undefined);
 
   const handleEdit = (med: Medication) => {
     setSelectedMedication(med);
     setSheetOpen(true);
   };
 
-  const handleAddNew = () => {
+  const handleAddNew = (initialValues?: Partial<Medication>) => {
     setSelectedMedication(undefined);
+    setParsedMedication(initialValues);
     setSheetOpen(true);
+  };
+
+  const handleScanPrescription = () => {
+    setScanOpen(true);
   };
 
   const handleSmartSchedule = (med: Medication) => {
@@ -34,17 +56,21 @@ export function MedicationsClient() {
 
   return (
     <>
-      <div className="flex justify-end">
+      <div className="flex flex-wrap justify-end gap-2">
+        <Button variant="outline" onClick={handleScanPrescription}>
+          <Scan className="mr-2 h-4 w-4" />
+          Scan prescription
+        </Button>
         <Button onClick={handleAddNew}>
           <PlusCircle className="mr-2 h-4 w-4" />
           Add Medication
         </Button>
       </div>
 
-      <Card>
+      <Card key={tableKey}>
         <CardHeader>
           <CardTitle>Your Medications</CardTitle>
-          <CardDescription>A list of all your configured medications.</CardDescription>
+          
         </CardHeader>
         <CardContent>
           <Table>
@@ -112,18 +138,48 @@ export function MedicationsClient() {
           </Table>
         </CardContent>
       </Card>
-      
-      <MedicationFormSheet
-        open={sheetOpen}
-        onOpenChange={setSheetOpen}
-        medication={selectedMedication}
+
+      <PrescriptionScanDialog
+        open={scanOpen}
+        onOpenChange={(open) => {
+          setScanOpen(open);
+          if (!open) {
+            setParsedMedication(undefined);
+          }
+        }}
+        onContinue={handleAddNew}
       />
 
-      {selectedMedication && <SmartScheduleDialog
-        open={dialogOpen}
-        onOpenChange={setDialogOpen}
-        medication={selectedMedication}
-      />}
+      {sheetOpen && (
+        <MedicationFormSheet
+          open={true}
+          onOpenChange={(open) => {
+            setSheetOpen(open);
+            if (!open) {
+              setSelectedMedication(undefined);
+              setParsedMedication(undefined);
+              setTableKey((k) => k + 1);
+              setTimeout(cleanupRadixOverlay, 0);
+            }
+          }}
+          medication={selectedMedication}
+          initialValues={parsedMedication}
+        />
+      )}
+
+      {dialogOpen && selectedMedication && (
+        <SmartScheduleDialog
+          open={true}
+          onOpenChange={(open) => {
+            setDialogOpen(open);
+            if (!open) {
+              setSelectedMedication(undefined);
+              setTimeout(cleanupRadixOverlay, 0);
+            }
+          }}
+          medication={selectedMedication}
+        />
+      )}
     </>
   );
 }

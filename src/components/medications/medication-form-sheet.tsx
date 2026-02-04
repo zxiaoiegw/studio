@@ -22,12 +22,16 @@ import { toast } from '@/hooks/use-toast';
 import { PlusCircle, Trash2 } from 'lucide-react';
 import { useEffect } from 'react';
 
+const timeSchema = z.object({
+  value: z.string().regex(/^([01]\d|2[0-3]):([0-5]\d)$/, 'Invalid time format (HH:mm)'),
+});
+
 const formSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters.'),
   dosage: z.string().min(1, 'Dosage is required.'),
   schedule: z.object({
     frequency: z.enum(['daily', 'weekly', 'custom']),
-    times: z.array(z.string().regex(/^([01]\d|2[0-3]):([0-5]\d)$/, 'Invalid time format (HH:mm)')).min(1, 'At least one time is required.'),
+    times: z.array(timeSchema).min(1, 'At least one time is required.'),
     days: z.array(z.number()).optional(),
   }),
   refill: z.object({
@@ -40,19 +44,46 @@ type MedicationFormProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   medication?: Medication;
+  /** Initial values to pre-fill the form (e.g., from OCR scan) */
+  initialValues?: Partial<Medication>;
   trigger?: ReactNode;
 };
 
-export function MedicationFormSheet({ open, onOpenChange, medication, trigger }: MedicationFormProps) {
+export function MedicationFormSheet({ open, onOpenChange, medication, initialValues, trigger }: MedicationFormProps) {
   const { addMedication, updateMedication } = useMedication();
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: medication || {
+  
+  const getDefaultValues = () => {
+    if (medication) {
+      return { ...medication, schedule: { ...medication.schedule, times: medication.schedule.times.map((t) => ({ value: t })) } };
+    }
+    
+    if (initialValues) {
+      return {
+        name: initialValues.name || '',
+        dosage: initialValues.dosage || '',
+        schedule: {
+          frequency: initialValues.schedule?.frequency || 'daily',
+          times: initialValues.schedule?.times?.map((t) => ({ value: t })) || [{ value: '09:00' }],
+          days: initialValues.schedule?.days || [],
+        },
+        refill: {
+          quantity: initialValues.refill?.quantity || 30,
+          reminderThreshold: initialValues.refill?.reminderThreshold || 5,
+        },
+      };
+    }
+    
+    return {
       name: '',
       dosage: '',
-      schedule: { frequency: 'daily', times: ['09:00'], days: [] },
+      schedule: { frequency: 'daily', times: [{ value: '09:00' }], days: [] },
       refill: { quantity: 30, reminderThreshold: 5 },
-    },
+    };
+  };
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: getDefaultValues(),
   });
 
   const { fields, append, remove } = useFieldArray({
@@ -62,21 +93,22 @@ export function MedicationFormSheet({ open, onOpenChange, medication, trigger }:
 
   useEffect(() => {
     if (open) {
-      form.reset(medication || {
-        name: '',
-        dosage: '',
-        schedule: { frequency: 'daily', times: ['09:00'], days: [] },
-        refill: { quantity: 30, reminderThreshold: 5 },
-      });
+      const defaults = getDefaultValues();
+      form.reset(defaults);
     }
-  }, [open, medication, form]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, medication?.id, initialValues?.name]);
 
   function onSubmit(values: z.infer<typeof formSchema>) {
+    const payload = {
+      ...values,
+      schedule: { ...values.schedule, times: values.schedule.times.map((t) => t.value) },
+    };
     if (medication) {
-      updateMedication({ ...medication, ...values });
+      updateMedication({ ...medication, ...payload });
       toast({ title: 'Medication Updated', description: `${values.name} has been updated.` });
     } else {
-      addMedication(values);
+      addMedication(payload);
       toast({ title: 'Medication Added', description: `${values.name} has been added to your list.` });
     }
     onOpenChange(false);
@@ -141,7 +173,7 @@ export function MedicationFormSheet({ open, onOpenChange, medication, trigger }:
                       <FormField
                         key={field.id}
                         control={form.control}
-                        name={`schedule.times.${index}`}
+                        name={`schedule.times.${index}.value`}
                         render={({ field }) => (
                             <FormItem className='flex items-center gap-2 mt-2'>
                                 <FormControl><Input type="time" {...field} /></FormControl>
@@ -152,7 +184,7 @@ export function MedicationFormSheet({ open, onOpenChange, medication, trigger }:
                         )}
                       />
                     ))}
-                    <Button type="button" variant="outline" size="sm" className="mt-2" onClick={() => append('09:00')}>
+                    <Button type="button" variant="outline" size="sm" className="mt-2" onClick={() => append({ value: '09:00' })}>
                       <PlusCircle className="mr-2 h-4 w-4" /> Add Time
                     </Button>
                 </div>

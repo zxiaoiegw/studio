@@ -34,32 +34,40 @@ export function TodaySchedule() {
     })
     .sort((a, b) => a.time.localeCompare(b.time));
 
-  const handleLogIntake = (medicationId: string, medicationName: string, dosage: string, time: string) => {
+  const handleLogIntake = async (medicationId: string, medicationName: string, dosage: string, time: string) => {
     const logTime = new Date();
     const [hours, minutes] = time.split(':');
     logTime.setHours(parseInt(hours), parseInt(minutes), 0, 0);
 
-    logIntake({
-      medicationId,
-      medicationName,
-      time: logTime.toISOString(),
-      status: 'taken',
-      dosage,
-    });
+    try {
+      await logIntake({
+        medicationId,
+        medicationName,
+        time: logTime.toISOString(),
+        status: 'taken',
+        dosage,
+      });
 
-    toast({
-      title: 'Success!',
-      description: `${medicationName} intake logged.`,
-      variant: 'default',
-      className: 'bg-accent text-accent-foreground border-accent'
-    });
+      toast({
+        title: 'Success!',
+        description: `${medicationName} intake logged.`,
+        variant: 'default',
+        className: 'bg-accent text-accent-foreground border-accent'
+      });
+    } catch (err) {
+      toast({
+        title: 'Error',
+        description: err instanceof Error ? err.message : 'Failed to log intake',
+        variant: 'destructive',
+      });
+    }
   };
 
   return (
     <Card>
       <CardHeader>
         <CardTitle>Today's Schedule</CardTitle>
-        <CardDescription>Your medication plan for today. Stay on track!</CardDescription>
+        
       </CardHeader>
       <CardContent>
         {!isClient ? (
