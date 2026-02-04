@@ -4,7 +4,7 @@ export interface IMedication extends Document {
   name: string;
   dosage: string;
   schedule: {
-    frequency: 'daily' | 'custom';
+    frequency: 'daily' | 'weekly' | 'custom';
     times: string[];
     days?: number[];
   };
@@ -23,7 +23,7 @@ const MedicationSchema = new Schema<IMedication>({
   schedule: {
     frequency: { 
       type: String, 
-      enum: ['daily', 'custom'], 
+      enum: ['daily', 'weekly', 'custom'], 
       required: true 
     },
     times: [{ type: String, required: true }],

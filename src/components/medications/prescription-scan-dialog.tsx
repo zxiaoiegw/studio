@@ -54,8 +54,8 @@ export function PrescriptionScanDialog({
     setError(null);
   };
 
-  const handleScan = async () => {
-    if (!file) return;
+  const handleScan = async (): Promise<Partial<Medication> | null> => {
+    if (!file) return null;
 
     setScanning(true);
     setError(null);
@@ -76,7 +76,7 @@ export function PrescriptionScanDialog({
 
       const { text } = await response.json();
       const parsed = parsePrescriptionText(text);
-      
+
       // Convert parsed data to Medication format
       const medicationData: Partial<Medication> = {
         name: parsed.name || '',
@@ -92,19 +92,25 @@ export function PrescriptionScanDialog({
       };
 
       setParsedData(medicationData);
+      return medicationData;
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to scan prescription');
+      return null;
     } finally {
       setScanning(false);
     }
   };
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
     if (!file) return;
-    
+
     if (!parsedData) {
-      // If no parsed data, scan first
-      handleScan();
+      // Scan first and wait for result before closing
+      const result = await handleScan();
+      if (result) {
+        onOpenChange(false);
+        onContinue(result);
+      }
       return;
     }
 

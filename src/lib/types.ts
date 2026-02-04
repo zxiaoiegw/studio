@@ -20,6 +20,6 @@ export type IntakeLog = {
   medicationId: string;
   medicationName: string;
   time: string; // ISO 8601
-  status: 'taken' | 'skipped';
+  status: 'taken' | 'missed' | 'skipped';
   dosage: string;
 };

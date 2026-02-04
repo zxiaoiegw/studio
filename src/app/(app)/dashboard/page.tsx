@@ -1,15 +1,19 @@
+'use client';
+
+import { useUser } from '@clerk/nextjs';
 import { AdherenceOverview } from '@/components/dashboard/adherence-overview';
 import { TodaySchedule } from '@/components/dashboard/today-schedule';
 import { Button } from '@/components/ui/button';
 import { PlusCircle } from 'lucide-react';
 
 export default function DashboardPage() {
-  const user = { name: 'User' };
+  const { user } = useUser();
+  const displayName = user?.firstName ?? user?.fullName ?? 'User';
   return (
     <div className="flex flex-col gap-8">
       <div>
         <h1 className="text-3xl font-bold tracking-tight font-headline">
-          Welcome back, {user.name}
+          Welcome back, {displayName}
         </h1>
         
       </div>

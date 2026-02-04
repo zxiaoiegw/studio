@@ -54,9 +54,13 @@ export function MedicationFormSheet({ open, onOpenChange, medication, initialVal
   
   const getDefaultValues = () => {
     if (medication) {
-      return { ...medication, schedule: { ...medication.schedule, times: medication.schedule.times.map((t) => ({ value: t })) } };
+      const { id: _id, ...rest } = medication;
+      return {
+        ...rest,
+        schedule: { ...rest.schedule, times: rest.schedule.times.map((t) => ({ value: t })) },
+      };
     }
-    
+
     if (initialValues) {
       return {
         name: initialValues.name || '',
@@ -91,13 +95,14 @@ export function MedicationFormSheet({ open, onOpenChange, medication, initialVal
     name: 'schedule.times',
   });
 
+  // Reset form whenever the sheet opens or the source data (medication / initialValues) changes,
+  // so we always show current values when editing or pre-filling from scan.
   useEffect(() => {
     if (open) {
-      const defaults = getDefaultValues();
-      form.reset(defaults);
+      form.reset(getDefaultValues());
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, medication?.id, initialValues?.name]);
+  }, [open, JSON.stringify(medication ?? null), JSON.stringify(initialValues ?? null)]);
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     const payload = {
