@@ -15,6 +15,7 @@ import { z } from 'zod';
 const SmartScheduleInputSchema = z.object({
   medicationName: z.string(),
   dosage: z.string(),
+  currentSchedule: z.array(z.string()).optional(),
   intakeLogs: z.array(
     z.object({
       date: z.string(),
@@ -32,32 +33,67 @@ const SmartScheduleOutputSchema = z.object({
       reason: z.string(),
     })
   ),
+  answer: z.string().optional(),
 });
 export type SmartScheduleOutput = z.infer<typeof SmartScheduleOutputSchema>;
 
-const systemPrompt = `You are an AI assistant designed to analyze medication intake logs and suggest optimal, personalized reminder times to improve adherence and efficacy, minimizing side effects and maximizing benefits.
+const systemPrompt = `You are a pharmacist AI assistant that helps users optimize their medication schedules and answers medication questions.
 
-Respond with a JSON object only, no other text. The object must have this exact shape:
+SCHEDULE OPTIMIZATION RULES:
+1. Suggest OPTIMAL times based on pharmacological best practices for the specific medication - DO NOT just copy the user's current schedule
+2. Consider these factors when suggesting times:
+   - Medication absorption (with food vs empty stomach)
+   - Peak effectiveness timing (e.g., blood pressure meds often best in morning)
+   - Side effect management (e.g., diuretics not at night, sedating meds at bedtime)
+   - Drug interactions with meals or other medications
+3. Number of doses should match the medication's standard dosing:
+   - Once daily: suggest 1 optimal time
+   - Twice daily: suggest 2 times, ~12 hours apart
+   - Three times daily: suggest 3 times, ~6-8 hours apart
+
+EXAMPLES OF OPTIMAL TIMING:
+- Lisinopril (ACE inhibitor): Once daily, morning (monitors BP during day)
+- Metformin: With meals to reduce GI side effects
+- Levothyroxine: Morning on empty stomach, 30-60 min before food
+- Statins (atorvastatin): Evening (cholesterol synthesis peaks at night)
+- Omeprazole: 30 min before first meal
+
+You have two modes:
+1. **Question Mode**: If the user asks a question, provide a direct answer in the "answer" field AND suggest optimal schedule
+2. **Schedule Mode**: If no question, just provide optimized schedule suggestions
+
+Respond with JSON only:
 {
   "suggestedSchedule": [
-    { "time": "HH:MM", "reason": "Brief reason for this time" }
-  ]
+    { "time": "HH:MM", "reason": "Specific reason based on medication pharmacology" }
+  ],
+  "answer": "Direct answer (only if user asked a question)"
 }
-Format each suggested time as HH:MM (24-hour). Include at least one suggestion.`;
+
+Format times as HH:MM (24-hour). Always provide specific pharmacological reasons, not generic ones.`;
 
 function buildUserPrompt(input: SmartScheduleInput): string {
   const logsText =
     input.intakeLogs.length > 0
       ? input.intakeLogs.map((l) => `- Date: ${l.date}, Time: ${l.time}`).join('\n')
       : '(No intake logs yet)';
-  return `Medication Name: ${input.medicationName}
-Dosage: ${input.dosage}
-User Needs: ${input.userNeeds}
+  const currentScheduleText =
+    input.currentSchedule && input.currentSchedule.length > 0
+      ? input.currentSchedule.join(', ')
+      : '(Not set)';
+  return `Medication: ${input.medicationName} (${input.dosage})
+Current Schedule (may need optimization): ${currentScheduleText}
+User Question/Request: ${input.userNeeds || 'Please suggest the optimal times to take this medication based on its pharmacology.'}
 
-Intake Logs:
+Recent Intake History:
 ${logsText}
 
-Based on the provided intake logs and user needs, suggest an optimal medication schedule. Provide reasoning for each suggested time. Respond with JSON only.`;
+TASK: Suggest the BEST times to take ${input.medicationName} based on:
+1. How this specific medication works (absorption, peak effect, side effects)
+2. Standard pharmacological guidelines
+3. The user's question/needs if provided
+
+Do NOT just return the current schedule - provide genuinely optimal times with specific reasons.`;
 }
 
 export async function suggestOptimalSchedule(

@@ -15,7 +15,7 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { toast } from '@/hooks/use-toast';
-import { Loader2, Wand2, Clock, Sparkles } from 'lucide-react';
+import { Loader2, Wand2, Clock, Sparkles, MessageCircle } from 'lucide-react';
 import type { SmartScheduleOutput } from '@/ai/flows/smart-schedule-suggestions';
 import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
 
@@ -45,6 +45,7 @@ export function SmartScheduleDialog({ open, onOpenChange, medication }: SmartSch
       const result = await getSmartScheduleSuggestions({
         medicationName: medication.name,
         dosage: medication.dosage,
+        currentSchedule: medication.schedule.times,
         intakeLogs,
         userNeeds,
       });
@@ -104,10 +105,10 @@ export function SmartScheduleDialog({ open, onOpenChange, medication }: SmartSch
         {!suggestions ? (
           <div className="space-y-4 py-4">
             <div className="grid w-full items-center gap-1.5">
-              <Label htmlFor="user-needs">Any preferences or issues? (optional)</Label>
+              <Label htmlFor="user-needs">Ask a question or share preferences (optional)</Label>
               <Textarea
                 id="user-needs"
-                placeholder="e.g., 'I feel drowsy after my morning dose', 'I prefer taking it with meals.'"
+                placeholder="e.g., 'Should I take this with food?', 'What are common side effects?', 'I feel drowsy after my morning dose'"
                 value={userNeeds}
                 onChange={(e) => setUserNeeds(e.target.value)}
                 rows={3}
@@ -119,9 +120,16 @@ export function SmartScheduleDialog({ open, onOpenChange, medication }: SmartSch
             </Button>
           </div>
         ) : (
-          <div className="py-4 space-y-4">
+          <div className="py-4 space-y-4 max-h-[60vh] overflow-y-auto">
+            {suggestions.answer && (
+              <Alert className="bg-primary/10 border-primary/30">
+                <MessageCircle className="h-4 w-4 text-primary" />
+                <AlertTitle>Answer</AlertTitle>
+                <AlertDescription className="mt-2 text-sm whitespace-pre-wrap">{suggestions.answer}</AlertDescription>
+              </Alert>
+            )}
             <Alert>
-                <AlertTitle>New Suggested Schedule</AlertTitle>
+                <AlertTitle>Suggested Schedule</AlertTitle>
                 <AlertDescription>Here is the AI-optimized schedule for you.</AlertDescription>
             </Alert>
             <ul className="space-y-3">

@@ -6,6 +6,7 @@ import { z } from 'zod';
 const SmartScheduleActionInput = z.object({
   medicationName: z.string(),
   dosage: z.string(),
+  currentSchedule: z.array(z.string()).optional(),
   intakeLogs: z.array(
     z.object({
       date: z.string(),

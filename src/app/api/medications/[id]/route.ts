@@ -8,7 +8,7 @@ import { auth } from '@clerk/nextjs/server';
 // GET single medication
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { userId } = await auth();
@@ -16,8 +16,9 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const { id } = await params;
     await connectDB();
-    const medication = await Medication.findOne({ _id: params.id, userId });
+    const medication = await Medication.findOne({ _id: id, userId });
     
     if (!medication) {
       return NextResponse.json(
@@ -39,7 +40,7 @@ export async function GET(
 // PUT update medication
 export async function PUT(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { userId } = await auth();
@@ -47,10 +48,11 @@ export async function PUT(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const { id } = await params;
     await connectDB();
     const body = await request.json();
     const medication = await Medication.findOneAndUpdate(
-      { _id: params.id, userId },
+      { _id: id, userId },
       { ...body, userId },
       { new: true, runValidators: true }
     );
@@ -75,7 +77,7 @@ export async function PUT(
 // DELETE medication
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { userId } = await auth();
@@ -83,8 +85,9 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const { id } = await params;
     await connectDB();
-    const medication = await Medication.findOneAndDelete({ _id: params.id, userId });
+    const medication = await Medication.findOneAndDelete({ _id: id, userId });
     
     if (!medication) {
       return NextResponse.json(
