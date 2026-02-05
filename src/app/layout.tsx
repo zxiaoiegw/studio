@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { ClerkProvider } from '@clerk/nextjs';
 import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
@@ -9,6 +9,11 @@ import { cn } from '@/lib/utils';
 export const metadata: Metadata = {
   title: 'PillPal',
   description: 'Your daily medication tracker.',
+};
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
 };
 
 export default function RootLayout({

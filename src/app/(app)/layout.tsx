@@ -6,12 +6,12 @@ import {
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
-  SidebarFooter,
   SidebarProvider,
   SidebarInset,
   SidebarTrigger,
+  useSidebar,
 } from '@/components/ui/sidebar';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
 import {
   LayoutDashboard,
   Pill,
@@ -20,9 +20,24 @@ import {
 import { NotificationDropdown } from '@/components/notifications/notification-dropdown';
 import { SignedIn, UserButton } from '@clerk/nextjs';
 import { usePathname } from 'next/navigation';
-import { Logo } from '@/components/icons';
+import { Logo, LogoIcon } from '@/components/icons';
 import Image from 'next/image';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
+
+function MobileHeaderTrigger() {
+  const { toggleSidebar } = useSidebar();
+  return (
+    <Button
+      variant="ghost"
+      size="icon"
+      className="h-9 w-9 md:hidden hover:bg-transparent"
+      onClick={toggleSidebar}
+      aria-label="Open menu"
+    >
+      <LogoIcon />
+    </Button>
+  );
+}
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -68,26 +83,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             </SidebarMenuItem>
           ))}
         </SidebarMenu>
-        {/* <SidebarFooter className="mt-auto">
-          <div className="flex items-center gap-3 p-2">
-            {userAvatar && (
-              <Avatar className="size-10">
-                <AvatarImage src={userAvatar.imageUrl} alt="User avatar" data-ai-hint={userAvatar.imageHint} />
-                <AvatarFallback>UN</AvatarFallback>
-              </Avatar>
-            )}
-            <div className="flex flex-col text-sm group-data-[collapsible=icon]:hidden">
-              <span className="font-semibold text-sidebar-foreground">
-                User Name
-              </span>
-              <span className="text-sidebar-foreground/70">user@pillpal.com</span>
-            </div>
-          </div>
-        </SidebarFooter> */}
       </Sidebar>
       <SidebarInset>
         <header className="sticky top-0 z-10 flex h-16 items-center justify-between border-b bg-background/80 px-4 backdrop-blur-sm">
-          <SidebarTrigger className="md:hidden" />
+          <MobileHeaderTrigger />
           <SignedIn>
             <div className="ml-auto flex items-center gap-4">
               <NotificationDropdown />
