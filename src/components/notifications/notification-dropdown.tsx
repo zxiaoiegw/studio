@@ -8,7 +8,6 @@ import {
   DropdownMenuContent,
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 
@@ -79,15 +78,16 @@ export function NotificationDropdown() {
     const d = new Date(iso);
     const now = new Date();
     const isToday = d.toDateString() === now.toDateString();
+
     if (isToday) {
-      return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      return `Today at ${d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
     }
-    return d.toLocaleDateString([], {
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
+
+    const dayName = d.toLocaleDateString([], { weekday: 'short' });
+    const date = d.toLocaleDateString([], { month: 'short', day: 'numeric' });
+    const time = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+    return `${dayName}, ${date} at ${time}`;
   };
 
   return (
@@ -119,7 +119,7 @@ export function NotificationDropdown() {
             </Button>
           )}
         </div>
-        <ScrollArea className="max-h-[320px]">
+        <div className="max-h-[320px] overflow-y-auto">
           {loading ? (
             <div className="flex items-center justify-center py-8 text-sm text-muted-foreground">
               Loading...
@@ -182,7 +182,7 @@ export function NotificationDropdown() {
               )}
             </div>
           )}
-        </ScrollArea>
+        </div>
       </DropdownMenuContent>
     </DropdownMenu>
   );

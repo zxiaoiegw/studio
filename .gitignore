@@ -46,3 +46,6 @@ firestore-debug.log
 
 # Google Cloud credentials
 config/google-credentials.json
+
+tmpclaude-*
+tmpclaude-*-cwd
