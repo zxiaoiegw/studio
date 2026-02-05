@@ -6,9 +6,17 @@ import { Skeleton } from '@/components/ui/skeleton';
 export function AdherenceCalendar() {
   const { logs, isClient } = useMedication();
 
+  // Normalize dates to midnight to ensure proper day comparison
+  // and deduplicate (multiple doses on same day should only mark once)
   const loggedDays = logs
     .filter(log => log.status === 'taken')
-    .map(log => new Date(log.time));
+    .map(log => {
+      const date = new Date(log.time);
+      return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    })
+    .filter((date, index, self) =>
+      index === self.findIndex(d => d.getTime() === date.getTime())
+    );
 
   if (!isClient) {
     return <Skeleton className="h-[298px] w-[280px] rounded-md" />;
@@ -20,12 +28,9 @@ export function AdherenceCalendar() {
       selected={loggedDays}
       className="rounded-md"
       classNames={{
-        day_selected: "bg-primary/80 text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground",
+        selected: "bg-primary/80 text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground",
       }}
-      modifiers={{
-        // Prevents selecting days
-        disabled: () => true,
-      }}
+      disabled
     />
   );
 }
