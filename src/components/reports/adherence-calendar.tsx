@@ -27,10 +27,15 @@ export function AdherenceCalendar() {
       mode="multiple"
       selected={loggedDays}
       className="rounded-md"
-      classNames={{
-        selected: "bg-primary/80 text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground",
+      modifiers={{
+        taken: loggedDays,
       }}
-      disabled
+      modifiersClassNames={{
+        taken: "bg-primary/80 text-primary-foreground hover:bg-primary hover:text-primary-foreground",
+      }}
+      classNames={{
+        day_button: "h-9 w-9 p-0 font-normal aria-selected:opacity-100 w-full rounded-md",
+      }}
     />
   );
 }
