@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git checkout:*)",
+      "Bash(npx tsc:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nAdd global AI assistant with context-aware help\n\n- Add floating AI button on all pages \\(Dashboard, Medications, Reports\\)\n- AI adapts responses based on current page context\n- Dashboard: helps with today''s schedule and adherence questions\n- Medications: answers medication questions \\(side effects, timing, interactions\\)\n- Reports: explains adherence patterns and suggests improvements\n- Includes chat interface with follow-up suggestions\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git merge:*)"
+    ]
+  }
+}
