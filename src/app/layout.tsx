@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { ClerkProvider } from '@clerk/nextjs';
 import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
+import { DemoProvider } from '@/context/demo-context';
 import { MedicationProvider } from '@/context/medication-context';
 import { RootHeader } from '@/components/root-header';
 import { cn } from '@/lib/utils';
@@ -26,11 +27,13 @@ export default function RootLayout({
           <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;600;700&display=swap" rel="stylesheet" />
         </head>
         <body className={cn('font-body antialiased', 'min-h-screen bg-background font-sans')}>
-          <RootHeader />
-          <MedicationProvider>
-            {children}
-            <Toaster />
-          </MedicationProvider>
+          <DemoProvider>
+            <RootHeader />
+            <MedicationProvider>
+              {children}
+              <Toaster />
+            </MedicationProvider>
+          </DemoProvider>
         </body>
       </html>
     </ClerkProvider>

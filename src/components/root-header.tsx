@@ -9,14 +9,16 @@ import {
 } from '@clerk/nextjs';
 import { Bell } from 'lucide-react';
 import { usePathname } from 'next/navigation';
+import { useDemoMode } from '@/context/demo-context';
 
 const APP_ROUTES = ['/dashboard', '/medications', '/reports'];
 
 export function RootHeader() {
   const pathname = usePathname();
+  const { isDemo } = useDemoMode();
   const isAppRoute = APP_ROUTES.some((route) => pathname?.startsWith(route));
 
-  if (isAppRoute) return null;
+  if (isAppRoute || isDemo) return null;
 
   return (
     <header className="sticky top-0 z-50 flex justify-end items-center gap-4 px-4 py-3 border-b bg-background/80 backdrop-blur-md transition-all duration-300">

@@ -16,6 +16,8 @@ import {
   LayoutDashboard,
   Pill,
   BarChart3,
+  LogOut,
+  User,
 } from 'lucide-react';
 import { NotificationDropdown } from '@/components/notifications/notification-dropdown';
 import { GlobalAIAssistant } from '@/components/ai/global-ai-assistant';
@@ -24,6 +26,7 @@ import { usePathname } from 'next/navigation';
 import { Logo, LogoIcon } from '@/components/icons';
 import Image from 'next/image';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
+import { useDemoMode } from '@/context/demo-context';
 
 function MobileHeaderTrigger() {
   const { toggleSidebar } = useSidebar();
@@ -43,6 +46,7 @@ function MobileHeaderTrigger() {
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const userAvatar = PlaceHolderImages.find(img => img.id === 'user-avatar');
+  const { isDemo, exitDemo } = useDemoMode();
 
   const menuItems = [
     {
@@ -88,12 +92,25 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       <SidebarInset>
         <header className="sticky top-0 z-10 flex h-16 w-full max-w-full items-center justify-between border-b bg-background/80 px-4 backdrop-blur-sm overflow-hidden">
           <MobileHeaderTrigger />
-          <SignedIn>
+          {isDemo ? (
             <div className="ml-auto flex items-center gap-3 shrink-0">
-              <NotificationDropdown />
-              <UserButton />
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-100 px-3 py-1 text-xs font-medium text-amber-800">
+                <User className="h-3 w-3" />
+                Demo Mode
+              </span>
+              <Button variant="outline" size="sm" onClick={exitDemo}>
+                <LogOut className="mr-1.5 h-3.5 w-3.5" />
+                Exit Demo
+              </Button>
             </div>
-          </SignedIn>
+          ) : (
+            <SignedIn>
+              <div className="ml-auto flex items-center gap-3 shrink-0">
+                <NotificationDropdown />
+                <UserButton />
+              </div>
+            </SignedIn>
+          )}
         </header>
         <main className="flex-1 p-4 md:p-6 lg:p-8">
           {children}

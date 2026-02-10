@@ -5,10 +5,12 @@ import { AdherenceOverview } from '@/components/dashboard/adherence-overview';
 import { TodaySchedule } from '@/components/dashboard/today-schedule';
 import { Button } from '@/components/ui/button';
 import { PlusCircle } from 'lucide-react';
+import { useDemoMode } from '@/context/demo-context';
 
 export default function DashboardPage() {
   const { user } = useUser();
-  const displayName = user?.firstName ?? user?.fullName ?? 'User';
+  const { isDemo } = useDemoMode();
+  const displayName = isDemo ? 'Demo User' : (user?.firstName ?? user?.fullName ?? 'User');
   return (
     <div className="flex flex-col gap-8 min-w-0 w-full overflow-hidden">
       <div>
